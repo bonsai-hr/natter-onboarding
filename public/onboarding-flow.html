@@ -135,6 +135,11 @@
       background: var(--b-bg); color: var(--b-text); border: 1px solid var(--b-border); white-space: nowrap;
     }
     .task-timing { font-size: 11px; color: var(--muted); white-space: nowrap; }
+    .task-comment-count {
+      font-size: 11px; color: #7C3AED; background: #EDE9FE;
+      border: 1px solid #C4B5FD; border-radius: 20px;
+      padding: 2px 7px; font-weight: 600; white-space: nowrap;
+    }
 
     /* ── FOUNDER FLAG ────────────────────────────────── */
     .task-flag-icon {
@@ -456,6 +461,7 @@ function commentListHTML(taskId) {
 /* ── TASK CARD HTML ───────────────────────────────── */
 function cardHTML(task) {
   const o = OWNERS[task.owner] || OWNERS['new-hire'];
+  const count = getComments(task.id).length;
 
   const flagIcon = task.founderNote
     ? `<div class="task-flag-icon" data-tooltip="${esc(task.founderNote)}">⚑</div>`
@@ -479,6 +485,7 @@ function cardHTML(task) {
     <span class="task-name">${task.name}</span>
     <div class="task-right">
       <span class="task-timing">${task.timing}</span>
+      ${count > 0 ? `<span class="task-comment-count">💬 ${count}</span>` : ''}
       ${flagIcon}
       <span class="task-chevron">▾</span>
     </div>
@@ -557,6 +564,21 @@ function refreshCommentSection(taskId) {
   const newListHTML = commentListHTML(taskId);
   if (existingList) existingList.outerHTML = newListHTML || '';
   else if (newListHTML) cs.insertAdjacentHTML('afterbegin', newListHTML);
+
+  // sync comment count badge in the collapsed task row
+  const card = document.querySelector(`.task-card[data-id="${taskId}"]`);
+  if (!card) return;
+  const taskRight = card.querySelector('.task-right');
+  if (!taskRight) return;
+  const count = getComments(taskId).length;
+  const existing = taskRight.querySelector('.task-comment-count');
+  if (count > 0) {
+    const badgeHTML = `<span class="task-comment-count">💬 ${count}</span>`;
+    if (existing) existing.outerHTML = badgeHTML;
+    else taskRight.querySelector('.task-chevron').insertAdjacentHTML('beforebegin', badgeHTML);
+  } else {
+    if (existing) existing.remove();
+  }
 }
 
 /* ── SUBMIT COMMENT ───────────────────────────────── */
