@@ -40,6 +40,12 @@ export default function WelcomePage() {
         >
           Start your journey →
         </Link>
+        <a
+          href="/onboarding-flow.html"
+          className="inline-block mt-4 border border-white text-white px-8 py-4 rounded-full text-base font-semibold hover:bg-white hover:text-ink transition-colors"
+        >
+          Review onboarding flow →
+        </a>
       </section>
 
       {/* Stats */}

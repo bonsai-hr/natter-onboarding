@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Natter — New Hire Onboarding Flow</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --brand: #7C3AED;
+      --brand-light: #EDE9FE;
+      --ink: #0F0A1E;
+      --muted: #6B7280;
+      --border: #E5E7EB;
+      --bg: #F9FAFB;
+      --white: #FFFFFF;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+      font-size: 14px;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* ── HEADER ─────────────────────────────────────── */
+    .header {
+      position: sticky; top: 0; z-index: 200;
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+    }
+    .header-inner { max-width: 980px; margin: 0 auto; padding: 0 24px; }
+    .header-row {
+      display: flex; align-items: center; gap: 12px;
+      padding: 11px 0; flex-wrap: wrap;
+    }
+    .wordmark {
+      background: var(--ink); color: #fff;
+      font-weight: 800; font-size: 13px;
+      letter-spacing: -0.04em; padding: 4px 10px;
+      border-radius: 5px; flex-shrink: 0; user-select: none;
+    }
+    .header-sep { width: 1px; height: 15px; background: var(--border); flex-shrink: 0; }
+    .header-title { font-size: 12.5px; color: var(--muted); white-space: nowrap; }
+    .legend {
+      display: flex; flex-wrap: wrap; gap: 5px 14px;
+      align-items: center; flex: 1; justify-content: flex-end;
+    }
+    .legend-item {
+      display: flex; align-items: center; gap: 5px;
+      font-size: 11px; color: var(--muted); white-space: nowrap;
+    }
+    .legend-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+
+    /* ── PHASE TABS ──────────────────────────────────── */
+    .phase-tabs {
+      display: flex; border-top: 1px solid var(--border);
+      overflow-x: auto; scrollbar-width: none;
+    }
+    .phase-tabs::-webkit-scrollbar { display: none; }
+    .phase-tab {
+      flex-shrink: 0; padding: 9px 16px;
+      font-size: 12.5px; font-weight: 500; color: var(--muted);
+      border: none; background: none; cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: color .15s, border-color .15s; white-space: nowrap;
+    }
+    .phase-tab:hover { color: var(--ink); }
+    .phase-tab.active { color: var(--ink); border-bottom-color: var(--brand); font-weight: 600; }
+
+    /* ── MAIN ────────────────────────────────────────── */
+    .main { max-width: 980px; margin: 0 auto; padding: 32px 24px 64px; }
+    .phase-heading { margin-bottom: 24px; }
+    .phase-heading h1 { font-size: 22px; font-weight: 700; color: var(--ink); }
+    .phase-heading p { font-size: 13px; color: var(--muted); margin-top: 3px; }
+
+    /* ── BANNERS ─────────────────────────────────────── */
+    .founder-banner {
+      display: flex; align-items: flex-start; gap: 10px;
+      background: #FEF2F2; border: 1.5px solid #FECACA;
+      border-radius: 10px; padding: 12px 16px; margin-bottom: 20px;
+      font-size: 12.5px; color: #991B1B; line-height: 1.5;
+    }
+    .doc-banner {
+      display: flex; align-items: flex-start; gap: 10px;
+      background: #FFFBEB; border: 1.5px solid #FDE68A;
+      border-radius: 10px; padding: 12px 16px; margin-bottom: 24px;
+      font-size: 12.5px; color: #92400E; line-height: 1.5;
+    }
+    .weeks-note {
+      background: var(--brand-light); border: 1px solid #C4B5FD;
+      border-radius: 10px; padding: 12px 16px; margin-bottom: 24px;
+      font-size: 12.5px; color: #4C1D95; line-height: 1.5;
+    }
+
+    /* ── OWNER SECTION ───────────────────────────────── */
+    .owner-section { margin-bottom: 28px; }
+    .owner-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+    .owner-label {
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .06em; padding: 3px 9px; border-radius: 20px;
+      background: var(--s-bg); color: var(--s-text); border: 1px solid var(--s-border);
+    }
+    .owner-count { font-size: 11px; color: var(--muted); font-weight: 500; }
+
+    /* ── TASK CARD ───────────────────────────────────── */
+    .task-card {
+      border: 1px solid var(--border); border-radius: 10px;
+      background: var(--white); margin-bottom: 6px;
+      border-left: 3px solid var(--b-border); overflow: hidden;
+      transition: box-shadow .15s;
+    }
+    .task-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,.06); }
+    .task-card.open { box-shadow: 0 2px 12px rgba(0,0,0,.08); }
+
+    .task-top {
+      display: flex; align-items: center; gap: 10px;
+      padding: 11px 14px; cursor: pointer; user-select: none;
+    }
+    .task-id {
+      font-size: 10.5px; font-weight: 700; color: var(--muted);
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      flex-shrink: 0; min-width: 52px;
+    }
+    .task-name { font-size: 13px; font-weight: 500; color: var(--ink); flex: 1; line-height: 1.4; }
+    .task-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .task-badge {
+      font-size: 11px; font-weight: 600; padding: 2px 9px; border-radius: 20px;
+      background: var(--b-bg); color: var(--b-text); border: 1px solid var(--b-border); white-space: nowrap;
+    }
+    .task-timing { font-size: 11px; color: var(--muted); white-space: nowrap; }
+
+    /* ── FOUNDER FLAG ────────────────────────────────── */
+    .task-flag-icon {
+      display: flex; align-items: center; justify-content: center;
+      width: 22px; height: 22px; border-radius: 50%;
+      background: #FEF2F2; border: 1.5px solid #FECACA;
+      flex-shrink: 0; font-size: 11px; font-weight: 700; color: #DC2626;
+      position: relative;
+    }
+    .task-flag-icon::after {
+      content: attr(data-tooltip);
+      position: absolute; right: 28px; top: 50%; transform: translateY(-50%);
+      background: #1F2937; color: #fff; font-size: 11px;
+      padding: 5px 9px; border-radius: 6px;
+      width: 220px; white-space: normal;
+      pointer-events: none; opacity: 0; transition: opacity .15s;
+      z-index: 100; line-height: 1.4;
+    }
+    .task-flag-icon:hover::after { opacity: 1; }
+
+    .task-chevron {
+      color: #D1D5DB; font-size: 14px;
+      transition: transform .2s, color .15s; flex-shrink: 0;
+    }
+    .task-card.open .task-chevron { transform: rotate(180deg); color: var(--muted); }
+
+    .task-body {
+      display: none; padding: 0 14px 14px;
+      border-top: 1px solid var(--border);
+    }
+    .task-card.open .task-body { display: block; }
+
+    .task-desc {
+      font-size: 13px; color: #374151; line-height: 1.65;
+      padding-top: 12px; margin-bottom: 12px;
+    }
+    .task-footer { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+    .cat-chip {
+      font-size: 11px; background: var(--brand-light); color: var(--brand);
+      padding: 2px 8px; border-radius: 20px; font-weight: 600;
+    }
+
+    /* ── CALLOUTS ────────────────────────────────────── */
+    .callout {
+      display: flex; align-items: flex-start; gap: 8px;
+      font-size: 12.5px; padding: 10px 12px; border-radius: 8px;
+      margin-top: 8px; line-height: 1.5;
+    }
+    .callout-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+    .callout-resource { background: #F0FDF4; border: 1px solid #BBF7D0; color: #166534; }
+    .callout-approval { background: #EFF6FF; border: 1px solid #BFDBFE; color: #1E40AF; }
+    .callout-doc { background: #FFFBEB; border: 1px solid #FDE68A; color: #92400E; }
+    .callout-founder { background: #FEF2F2; border: 1.5px solid #FECACA; color: #991B1B; }
+    .callout strong { font-weight: 700; }
+
+    /* ── COMMENT SECTION ─────────────────────────────── */
+    .comment-section { margin-top: 14px; border-top: 1px solid var(--border); padding-top: 12px; }
+
+    /* existing comments list */
+    .comment-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
+    .comment-item {
+      background: #F8FAFC; border: 1px solid var(--border);
+      border-radius: 8px; padding: 9px 12px;
+    }
+    .comment-meta {
+      display: flex; align-items: center; justify-content: space-between; margin-bottom: 3px;
+    }
+    .comment-author { font-size: 11.5px; font-weight: 700; color: var(--ink); }
+    .comment-time { font-size: 10.5px; color: var(--muted); }
+    .comment-text { font-size: 12.5px; color: #374151; line-height: 1.5; }
+    .comment-delete {
+      background: none; border: none; cursor: pointer;
+      color: #D1D5DB; font-size: 12px; padding: 0 3px;
+      transition: color .15s; margin-left: 6px;
+    }
+    .comment-delete:hover { color: #DC2626; }
+
+    /* comment input area */
+    .comment-input-wrap { position: relative; }
+    .comment-name-row {
+      display: flex; gap: 8px; margin-bottom: 6px;
+    }
+    .comment-name-input {
+      flex: 0 0 140px; font-size: 12.5px; padding: 7px 10px;
+      border: 1px solid var(--border); border-radius: 7px;
+      background: var(--white); color: var(--ink); outline: none;
+      font-family: inherit; transition: border-color .15s;
+    }
+    .comment-name-input:focus { border-color: var(--brand); }
+    .comment-textarea-wrap { position: relative; }
+    .comment-textarea {
+      width: 100%; font-size: 12.5px; padding: 9px 70px 9px 12px;
+      border: 1px solid var(--border); border-radius: 7px;
+      background: var(--white); color: var(--ink);
+      resize: none; min-height: 60px; outline: none;
+      font-family: inherit; line-height: 1.5;
+      transition: border-color .15s;
+    }
+    .comment-textarea:focus { border-color: var(--brand); }
+    .comment-textarea::placeholder { color: #9CA3AF; }
+    .comment-submit {
+      position: absolute; bottom: 8px; right: 8px;
+      font-size: 11.5px; font-weight: 600; padding: 5px 11px;
+      background: var(--brand); color: var(--white);
+      border: none; border-radius: 5px; cursor: pointer;
+      transition: opacity .15s; white-space: nowrap;
+    }
+    .comment-submit:hover { opacity: .88; }
+    .comment-submit:disabled { opacity: .4; cursor: not-allowed; }
+
+    /* saving indicator */
+    .comment-status {
+      font-size: 11px; color: var(--muted); margin-top: 4px;
+      min-height: 16px; transition: opacity .2s;
+    }
+
+    @media (max-width: 640px) {
+      .task-timing { display: none; }
+      .task-flag-icon::after { right: auto; left: 28px; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-inner">
+    <div class="header-row">
+      <span class="wordmark">natter</span>
+      <div class="header-sep"></div>
+      <span class="header-title">New Hire Onboarding Flow</span>
+      <div class="legend" id="legend"></div>
+    </div>
+    <div class="phase-tabs" id="phaseTabs"></div>
+  </div>
+</header>
+
+<main class="main" id="main"></main>
+
+<script>
+/* ── JSONBIN CONFIG ───────────────────────────────── */
+const BIN_ID     = '6a1d74dbddf5aa59f77f85bb';
+const ACCESS_KEY = '$2a$10$RCZau883rzG/7hUZ1Hoczu2oDHBHeh.3bvJ9Mw2Wo3sjQowB.c0x6';
+const BIN_URL    = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
+
+/* ── COMMENT STATE ────────────────────────────────── */
+let COMMENTS = {};   // { taskId: [{id, author, text, ts}] }
+let binLoaded = false;
+
+async function fetchComments() {
+  try {
+    const res = await fetch(BIN_URL, {
+      headers: { 'X-Access-Key': ACCESS_KEY }
+    });
+    const data = await res.json();
+    COMMENTS = data.record?.comments || {};
+    binLoaded = true;
+  } catch(e) {
+    console.warn('Could not load comments:', e);
+    COMMENTS = {};
+  }
+}
+
+async function persistComments() {
+  try {
+    await fetch(BIN_URL, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Access-Key': ACCESS_KEY
+      },
+      body: JSON.stringify({ comments: COMMENTS })
+    });
+  } catch(e) {
+    console.warn('Could not save comments:', e);
+  }
+}
+
+/* ── OWNERS ───────────────────────────────────────── */
+const OWNERS = {
+  'new-hire': { label: 'New Hire',          bBg:'#EDE9FE', bText:'#5B21B6', bBorder:'#8B5CF6', sBg:'#EDE9FE', sText:'#5B21B6', sBorder:'#8B5CF6' },
+  'manager':  { label: 'Hiring Manager',    bBg:'#DBEAFE', bText:'#1E40AF', bBorder:'#3B82F6', sBg:'#DBEAFE', sText:'#1E40AF', sBorder:'#3B82F6' },
+  'shared':   { label: 'New Hire + Manager',bBg:'#F3E8FF', bText:'#7C3AED', bBorder:'#A78BFA', sBg:'#F3E8FF', sText:'#7C3AED', sBorder:'#A78BFA' },
+  'hr':       { label: 'HR / James',        bBg:'#FEF9C3', bText:'#854D0E', bBorder:'#EAB308', sBg:'#FEF9C3', sText:'#854D0E', sBorder:'#EAB308' },
+  'buddy':    { label: 'New Hire + Buddy',  bBg:'#DCFCE7', bText:'#166534', bBorder:'#22C55E', sBg:'#DCFCE7', sText:'#166534', sBorder:'#22C55E' },
+  'ceo':      { label: 'CEO (Charlie)',      bBg:'#FFF7ED', bText:'#9A3412', bBorder:'#F97316', sBg:'#FFF7ED', sText:'#9A3412', sBorder:'#F97316' },
+  'ea':       { label: 'EA (Oyin)',          bBg:'#F0FDFA', bText:'#0F766E', bBorder:'#14B8A6', sBg:'#F0FDFA', sText:'#0F766E', sBorder:'#14B8A6' },
+  'it':       { label: 'IT (James)',         bBg:'#FEF3C7', bText:'#92400E', bBorder:'#F59E0B', sBg:'#FEF3C7', sText:'#92400E', sBorder:'#F59E0B' },
+};
+const OWNER_ORDER = ['new-hire','shared','buddy','manager','hr','it','ea','ceo'];
+
+/* ── PHASES ───────────────────────────────────────── */
+const PHASES = [
+  { id:'pre-boarding', label:'Pre-Boarding',  subtitle:'From offer signing to Day 1' },
+  { id:'day-1',        label:'Day 1',          subtitle:'Access, orientation, and first connections' },
+  { id:'week-1',       label:'Week 1',         subtitle:'Foundation, platform learning and leadership intros' },
+  { id:'weeks-2-4',    label:'Weeks 2–4',      subtitle:'Universal minimums — role-specific tasks set by your hiring manager', hasNote:true },
+  { id:'30-day',       label:'30-Day',         subtitle:'30-Day Check-In' },
+  { id:'60-day',       label:'60-Day',         subtitle:'60-Day Check-In' },
+  { id:'90-day',       label:'90-Day',         subtitle:'90-Day Review' },
+];
+
+/* ── TASKS ────────────────────────────────────────── */
+const TASKS = [
+  // PRE-BOARDING
+  { id:'PB-01', phase:'pre-boarding', name:'Set up Rippling access', desc:"Create and activate the new hire's Rippling login before Day 1 so they can access their onboarding checklist from the moment they sign.", owner:'it', timing:'1 week before start', cat:'Systems' },
+  { id:'PB-02', phase:'pre-boarding', name:'Assign buddy to new hire', desc:"Identify a tenured team member (non-VP) to serve as the new hire's buddy for their first month. They'll connect briefly every other day in Week 1. Introduce them by name in the welcome email.", owner:'manager', timing:'Within 3 days of signing', cat:'Admin' },
+  { id:'PB-03', phase:'pre-boarding', name:'Order MacBook Pro', desc:"Order the new hire's MacBook Pro (standard issue). Ensure it arrives and is set up before the start date.", owner:'it', timing:'2 weeks before start', cat:'Systems' },
+  { id:'PB-04', phase:'pre-boarding', name:'Set up Google Workspace / Gmail', desc:"Create @natter.co email and send comms to new hire's personal email to set up within 48 hours.", owner:'it', timing:'1 week before start', cat:'Systems' },
+  { id:'PB-05', phase:'pre-boarding', name:'Set up Slack account + channel access', desc:'Create Slack account and add to relevant channels based on role. Share invite in welcome email.', owner:'it', timing:'1 week before start', cat:'Systems' },
+  { id:'PB-06', phase:'pre-boarding', name:'Prepare role-based system access list', desc:'Compile the full list of systems the new hire needs: Gmail, Slack, Notion, Attio, Rippling etc.', owner:'manager', timing:'Before Day 1', cat:'Systems', resource:'System admin list [TBC]' },
+  { id:'PB-07', phase:'pre-boarding', name:'Send personalised welcome email', desc:"Send welcome email introducing: (1) the new hire's buddy (CC'ed in), (2) pre-boarding checklist instructions for Rippling, (3) Day 1 logistics. Keep it warm, welcoming and human.", owner:'manager', timing:'1 week before start', cat:'Culture', resource:'Welcome email template [TBC]' },
+  { id:'PB-08', phase:'pre-boarding', name:'Complete your personal details in Rippling', desc:'Fill in your personal info, emergency contacts, and bank details via Rippling.', owner:'new-hire', timing:'Within 5 days of signing', cat:'Admin' },
+  { id:'PB-09', phase:'pre-boarding', name:'Right to Work / compliance check', desc:'Complete your Right to Work verification as instructed. This is a legal requirement and must be done before your first day.', owner:'new-hire', timing:'ASAP after signing', cat:'Compliance', approval:'HR (James)', founderNote:'What is the current process for right to work checks?' },
+  { id:'PB-10', phase:'pre-boarding', name:'Get to know Natter', desc:"Before Day 1, spend some time with the Natter Overview and interactive demo. You don't need to memorise anything — just absorb the vibe, the vocabulary, and what makes this product genuinely different.", owner:'new-hire', timing:'Before Day 1', cat:'Learning', resource:'Interactive Natter Overview Demo [TBC]; Natter Explainer Welcome Guide [TBC]', founderNote:'Demo access for new joiners — pending finalisation with Andrej.' },
+  { id:'PB-12', phase:'pre-boarding', name:'Book Day 1 meeting to discuss 30/60/90 day plan', desc:"Prepare the plan ahead of this meeting, including a table with the onboarding crew (key people for your new starter to meet & guiding topics to cover). This format should align with the role's 30/60/90 day structure.", owner:'manager', timing:'Before Day 1', cat:'Admin', resource:'30/60/90 plan template [TBC]' },
+  { id:'PB-13', phase:'pre-boarding', name:'Submit your reference contacts', desc:"Provide the details of your references — typically former managers or senior colleagues who can speak to your work. You don't need to brief them yourself; HR will handle all outreach.", owner:'new-hire', timing:'Within 5 days of signing', cat:'Admin', resource:'Reference submission form [TBC]' },
+  { id:'PB-14', phase:'pre-boarding', name:'[HR] Chase and collect references', desc:"(Internal HR task — not visible to new hire.) Reach out to references provided and collect responses before the start date.", owner:'hr', timing:'Before Day 1', cat:'Admin', resource:'Reference collection process/template [TBC]', founderNote:'A new and efficient reference process will be made to flow smoothly with onboarding.' },
+  { id:'PB-15', phase:'pre-boarding', name:'Add to Soho Works', desc:"Oyin (EA) to add new hire to Soho Works.", owner:'ea', timing:'Before Day 1', cat:'Admin', founderNote:"Oyin will also need to assign a backup for when she's on leave." },
+
+  // DAY 1
+  { id:'D1-01', phase:'day-1', name:'Welcome, office tour & team intro', desc:"Give the new hire a warm welcome. Tour of office — seating, kitchen, meeting rooms, building entry. Introduce them to team members present. NY team is in the office Mon, Tue, Thu.", owner:'manager', timing:'First office day', cat:'Culture', resource:'Office housekeeping guide [TBC]' },
+  { id:'D1-02', phase:'day-1', name:'MacBook handover + confirm system access', desc:"Hand over the new hire's MacBook and walk through key logins: Gmail, Slack, Notion, Attio, Rippling. Confirm everything is working before leaving them to set up.", owner:'manager', timing:'Day 1, morning', cat:'Systems' },
+  { id:'D1-03', phase:'day-1', name:'Log into all your tools', desc:'Your accounts should be live. Log in and confirm access to: Gmail, Slack, Notion, Rippling, and Attio.', owner:'new-hire', timing:'Day 1', cat:'Systems' },
+  { id:'D1-05', phase:'day-1', name:'Download Slack + explore the workspace', desc:'Download the app, log in, explore.', owner:'new-hire', timing:'Day 1', cat:'Systems' },
+  { id:'D1-06', phase:'day-1', name:'Introduce yourself in Slack', desc:"Manager to agree with the new hire on an intro draft — and send to Charlie for approval before posting on #General.", owner:'shared', timing:'Day 1', cat:'Culture', founderNote:"With a robust template for intro's (e.g. set questions) — only the manager will need to review it, and won't need to pass through Charlie every time." },
+  { id:'D1-07', phase:'day-1', name:'In-person introduction to buddy', desc:"Your Day 1 buddy session — 20 minutes, totally informal. Grab a coffee if you're in the office. Get to know each other, ask anything you like. No agenda, no pressure.", owner:'buddy', timing:'Day 1', cat:'Social' },
+  { id:'D1-08', phase:'day-1', name:'Align with your manager on your 30/60/90 plan', desc:"Sit down with your hiring manager and walk through your 30/60/90 plan together. Align on expectations, ask your questions, and agree on what success looks like in Month 1.", owner:'shared', timing:'Day 1', cat:'Admin', resource:'30/60/90 plan template [TBC]' },
+
+  // WEEK 1
+  { id:'W1-01', phase:'week-1', name:'Intro coffee chats: JP · Andrew · Milos · James · Charlie', desc:"Reach out and book a 15-minute informal intro this week — NOT a formal 1:1, just a friendly hello.\n\n• JP: company foundations, culture, day-to-day operations\n• Andrew (VP Operations): commercial motion and account growth\n• Milos (Product): what's being built and product decisions\n• James (Co-founder & COO/CFO): compliance, contracts, IT, admin questions\n• Charlie (Co-founder & CEO): company vision and strategy", owner:'new-hire', timing:'By end of Week 1', cat:'Leadership' },
+  { id:'W1-02', phase:'week-1', name:'Deep-dive 1:1s with onboarding crew', desc:"Using the onboarding crew table in your 30/60/90 plan, reach out and book a 30–60 minute meeting with each person listed. These are structured deep-dives into the requirements of your role — come prepared with questions.", owner:'new-hire', timing:'By end of Week 2', cat:'Admin' },
+  { id:'W1-06', phase:'week-1', name:'Complete Natter platform deep-dive', desc:"Work through the interactive demo, the walkthrough, and the help centre. By the end, you should understand: core features, session types, and how a Natter is configured end-to-end. Note your questions — bring them to Milos.", owner:'new-hire', timing:'By Day 3', cat:'Learning', resource:'Interactive Demo [TBC]; How to Natter [TBC]; Natter Walkthrough [TBC]' },
+  { id:'W1-07', phase:'week-1', name:'Shadowing session', desc:"Join an active client meeting or pilot with Nayab or Andrew. Observe the success motion: how the platform is positioned, how questions are handled, and what good looks like. Take notes.", owner:'new-hire', timing:'Week 1', cat:'Learning' },
+  { id:'W1-10', phase:'week-1', name:'End of Week 1 manager check-in', desc:"An informal 15-minute check-in with your hiring manager. How is everything going? Anything to flag early? This is a safe space to be honest — it's about support, not assessment.", owner:'shared', timing:'Day 5', cat:'Review' },
+  { id:'W1-11', phase:'week-1', name:'LinkedIn announcement', desc:"Charlie gives final sign-off before it's posted. Approval flow: New hire drafts → Hiring manager approves → CEO (Charlie) approves → HR posts.", owner:'manager', timing:'By end of Week 1', cat:'Culture', approval:'Hiring manager, then CEO (Charlie)', resource:'LinkedIn post template [TBC]', founderNote:'How should LinkedIn announcements be formatted?' },
+
+  // WEEKS 2-4
+  { id:'W2-03', phase:'weeks-2-4', name:'Shadow more team members', desc:"Shadow Nayab and/or Andrew in 2 client or pilot meetings. Start mapping stakeholders per account: buyer, champion, admin, and users.", owner:'new-hire', timing:'Week 2', cat:'Learning' },
+  { id:'W2-06', phase:'weeks-2-4', name:'Confirm all 5 intro coffee chats are done or booked', desc:"By end of Week 2, all 5 intro chats (JP, Andrew, Milos, James, Charlie) should be completed or have a confirmed date. If any are still outstanding, reach out this week — don't let it slip.", owner:'new-hire', timing:'By end of Week 2', cat:'Leadership' },
+  { id:'W2-07', phase:'weeks-2-4', name:'Align with your leader on the roadmap', desc:"Book in 30–60 minutes with your leader and hiring manager to deep-dive on the team strategy, and what part everyone will play in that.", owner:'shared', timing:'Week 2', cat:'Learning' },
+
+  // 30-DAY
+  { id:'30D-01', phase:'30-day', name:'Complete your 30-day self-reflection', desc:"Before your review meeting, complete the self-reflection form. Be honest: what's going well, what's been challenging, and what do you need more of heading into Month 2?", owner:'new-hire', timing:'Day 28', cat:'Review', resource:'30-day self-reflection form [TBC]' },
+  { id:'30D-02', phase:'30-day', name:'30-day review meeting with manager', desc:"A structured 30-minute conversation with your hiring manager. Walk through your self-reflection together, align on Month 2 priorities, and flag any support you need.", owner:'shared', timing:'Day 30', cat:'Review', resource:'30/60/90 plan template [TBC]' },
+  { id:'30D-03', phase:'30-day', name:'[MANAGER] Submit 30-day sign-off to CEO', desc:"Following the review, complete the sign-off form and submit to Charlie. Include a brief progress summary and any notable support needs for Month 2.", owner:'manager', timing:'Day 32', cat:'Review', approval:'CEO (Charlie)', resource:'30-day sign-off form [TBC]' },
+  { id:'30D-04', phase:'30-day', name:'[CEO] Acknowledge 30-day review', desc:"Review the 30-day sign-off submission and confirm acknowledgement. This closes the loop on Month 1.", owner:'ceo', timing:'Day 35', cat:'Review' },
+
+  // 60-DAY
+  { id:'60D-01', phase:'60-day', name:'Complete your 60-day self-reflection', desc:"Complete the 60-day self-reflection form ahead of your review. At this stage, you should be operating more independently. Reflect on your impact and where you want to focus in Month 3.", owner:'new-hire', timing:'Day 58', cat:'Review', resource:'60-day self-reflection form [TBC]' },
+  { id:'60D-02', phase:'60-day', name:'60-day review meeting with manager', desc:"A 30-minute structured review with your hiring manager. Assess progress against your 30/60/90 plan and agree on clear Month 3 priorities.", owner:'shared', timing:'Day 60', cat:'Review', resource:'30/60/90 plan template [TBC]' },
+  { id:'60D-03', phase:'60-day', name:'[MANAGER] Submit 60-day sign-off to CEO', desc:"Complete and submit the 60-day sign-off form. Include a summary of Month 2 progress and agreed Month 3 goals.", owner:'manager', timing:'Day 62', cat:'Review', approval:'CEO (Charlie)', resource:'60-day sign-off form [TBC]' },
+  { id:'60D-04', phase:'60-day', name:'[CEO] Acknowledge 60-day review', desc:"Review and acknowledge the 60-day submission. This closes Month 2.", owner:'ceo', timing:'Day 65', cat:'Review' },
+
+  // 90-DAY
+  { id:'90D-01', phase:'90-day', name:'Complete 90-day self-reflection + probation self-assessment', desc:"This is the formal probation self-assessment. Reflect honestly on your impact across all three months: your growth, your contributions, your relationships, and your readiness to move forward.", owner:'new-hire', timing:'Day 88', cat:'Review', resource:'90-day / probation self-assessment form [TBC]' },
+  { id:'90D-02', phase:'90-day', name:'Formal 90-day / probation review with manager', desc:"A structured 45-minute meeting: performance against goals, cultural contribution, growth trajectory, and next steps. This is the formal end of your probation period. Come prepared.", owner:'shared', timing:'Day 90', cat:'Review', resource:'30/60/90 plan + probation review form [TBC]' },
+  { id:'90D-03', phase:'90-day', name:'[MANAGER] Submit probation decision to CEO', desc:"Complete and submit the probation decision form — including outcome (pass / extend / fail), supporting rationale, and Month 4 development areas — to Charlie for formal sign-off.", owner:'manager', timing:'Day 92', cat:'Review', approval:'CEO (Charlie) — FORMAL sign-off required', resource:'Probation decision form [TBC]' },
+  { id:'90D-04', phase:'90-day', name:'[CEO] Confirm probation outcome', desc:"Formally confirm the probation outcome. HR notified for record-keeping and next steps.", owner:'ceo', timing:'Day 95', cat:'Review' },
+];
+
+/* ── STATE ────────────────────────────────────────── */
+let activePhase = 'pre-boarding';
+
+/* ── HELPERS ──────────────────────────────────────── */
+function ownerVars(key) {
+  const o = OWNERS[key] || OWNERS['new-hire'];
+  return `--b-bg:${o.bBg};--b-text:${o.bText};--b-border:${o.bBorder};--s-bg:${o.sBg};--s-text:${o.sText};--s-border:${o.sBorder};`;
+}
+function hasTBC(task) { return task.resource && task.resource.includes('[TBC]'); }
+function getComments(taskId) { return COMMENTS[taskId] || []; }
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function fmtTime(ts) {
+  const d = new Date(ts);
+  return d.toLocaleDateString('en-GB',{day:'numeric',month:'short'}) + ' ' +
+         d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+}
+
+/* ── LEGEND ───────────────────────────────────────── */
+function renderLegend() {
+  document.getElementById('legend').innerHTML = OWNER_ORDER.map(k => {
+    const o = OWNERS[k];
+    return `<span class="legend-item"><span class="legend-dot" style="background:${o.sBorder}"></span>${o.label}</span>`;
+  }).join('');
+}
+
+/* ── PHASE TABS ───────────────────────────────────── */
+function renderPhaseTabs() {
+  const el = document.getElementById('phaseTabs');
+  el.innerHTML = PHASES.map(p =>
+    `<button class="phase-tab${p.id===activePhase?' active':''}" data-pid="${p.id}">${p.label}</button>`
+  ).join('');
+  el.querySelectorAll('.phase-tab').forEach(btn =>
+    btn.addEventListener('click', () => {
+      activePhase = btn.dataset.pid;
+      render();
+      btn.scrollIntoView({inline:'nearest',block:'nearest'});
+    })
+  );
+}
+
+/* ── COMMENT LIST HTML ────────────────────────────── */
+function commentListHTML(taskId) {
+  const comments = getComments(taskId);
+  if (!comments.length) return '';
+  return `<div class="comment-list">${comments.map(c => `
+    <div class="comment-item" data-cid="${c.id}">
+      <div class="comment-meta">
+        <span class="comment-author">${esc(c.author)}</span>
+        <span style="display:flex;align-items:center;gap:4px;">
+          <span class="comment-time">${fmtTime(c.ts)}</span>
+          <button class="comment-delete" onclick="deleteComment('${taskId}','${c.id}')" title="Delete comment">✕</button>
+        </span>
+      </div>
+      <p class="comment-text">${esc(c.text)}</p>
+    </div>`).join('')}
+  </div>`;
+}
+
+/* ── TASK CARD HTML ───────────────────────────────── */
+function cardHTML(task) {
+  const o = OWNERS[task.owner] || OWNERS['new-hire'];
+
+  const flagIcon = task.founderNote
+    ? `<div class="task-flag-icon" data-tooltip="${esc(task.founderNote)}">⚑</div>`
+    : '';
+
+  const approvalCallout = task.approval
+    ? `<div class="callout callout-approval"><span class="callout-icon">✓</span><div><strong>Approval required:</strong> ${task.approval}</div></div>`
+    : '';
+
+  const resourceCallout = hasTBC(task)
+    ? `<div class="callout callout-doc"><span class="callout-icon">📎</span><div><strong>Document pending:</strong> ${task.resource} — will be created and linked here before launch.</div></div>`
+    : (task.resource ? `<div class="callout callout-resource"><span class="callout-icon">📎</span><div><strong>Resource:</strong> ${task.resource}</div></div>` : '');
+
+  const founderCallout = task.founderNote
+    ? `<div class="callout callout-founder"><span class="callout-icon">⚑</span><div><strong>Note for founders:</strong> ${task.founderNote}</div></div>`
+    : '';
+
+  return `<div class="task-card" data-id="${task.id}" style="${ownerVars(task.owner)}">
+  <div class="task-top" onclick="toggleCard('${task.id}')">
+    <span class="task-id">${task.id}</span>
+    <span class="task-name">${task.name}</span>
+    <div class="task-right">
+      <span class="task-badge">${o.label}</span>
+      <span class="task-timing">${task.timing}</span>
+      ${flagIcon}
+      <span class="task-chevron">▾</span>
+    </div>
+  </div>
+  <div class="task-body">
+    <p class="task-desc">${task.desc.replace(/\n/g,'<br>')}</p>
+    <div class="task-footer"><span class="cat-chip">${task.cat}</span></div>
+    ${approvalCallout}${resourceCallout}${founderCallout}
+    <div class="comment-section" id="cs-${task.id}">
+      ${commentListHTML(task.id)}
+      <div class="comment-input-wrap">
+        <div class="comment-name-row">
+          <input class="comment-name-input" id="cn-${task.id}" type="text" placeholder="Your name" />
+        </div>
+        <div class="comment-textarea-wrap">
+          <textarea class="comment-textarea" id="ct-${task.id}" placeholder="Leave a comment…" rows="2"></textarea>
+          <button class="comment-submit" onclick="submitComment('${task.id}')">Post</button>
+        </div>
+        <div class="comment-status" id="cst-${task.id}"></div>
+      </div>
+    </div>
+  </div>
+</div>`;
+}
+
+/* ── CONTENT ──────────────────────────────────────── */
+function renderContent() {
+  const phase = PHASES.find(p => p.id === activePhase);
+  const tasks = TASKS.filter(t => t.phase === activePhase);
+  const flagged = tasks.filter(t => t.founderNote);
+  const tbcCount = tasks.filter(t => hasTBC(t)).length;
+
+  let html = `<div class="phase-heading"><h1>${phase.label}</h1><p>${phase.subtitle}</p></div>`;
+
+  if (flagged.length) {
+    html += `<div class="founder-banner">
+      <span>⚑</span>
+      <div><strong>Founder input needed</strong> — ${flagged.length} task${flagged.length>1?'s':''} in this phase need your feedback: ${flagged.map(t=>`<strong>${t.id}</strong>`).join(', ')}. Look for the <span style="color:#DC2626;font-weight:700;">⚑</span> icon on the task row.</div>
+    </div>`;
+  }
+  if (tbcCount) {
+    html += `<div class="doc-banner">
+      <span>📄</span>
+      <div><strong>${tbcCount} document${tbcCount>1?'s':''} pending</strong> — Resources marked [TBC] will be created and linked before launch.</div>
+    </div>`;
+  }
+  if (phase.hasNote) {
+    html += `<div class="weeks-note"><strong>Tasks from Weeks 2–4 are defined by your hiring manager.</strong> The three tasks below are universal minimums. Your manager will share role-specific tasks separately.</div>`;
+  }
+
+  OWNER_ORDER.forEach(ownerKey => {
+    const group = tasks.filter(t => t.owner === ownerKey);
+    if (!group.length) return;
+    const o = OWNERS[ownerKey];
+    html += `<div class="owner-section" style="${ownerVars(ownerKey)}">
+  <div class="owner-header">
+    <span class="owner-label">${o.label}</span>
+    <span class="owner-count">${group.length} task${group.length!==1?'s':''}</span>
+  </div>
+  ${group.map(cardHTML).join('')}
+</div>`;
+  });
+
+  document.getElementById('main').innerHTML = html;
+}
+
+/* ── TOGGLE CARD ──────────────────────────────────── */
+function toggleCard(id) {
+  document.querySelector(`.task-card[data-id="${id}"]`).classList.toggle('open');
+}
+
+/* ── REFRESH COMMENT SECTION ──────────────────────── */
+function refreshCommentSection(taskId) {
+  const cs = document.getElementById('cs-' + taskId);
+  if (!cs) return;
+  const existingList = cs.querySelector('.comment-list');
+  const newListHTML = commentListHTML(taskId);
+  if (existingList) existingList.outerHTML = newListHTML || '';
+  else if (newListHTML) cs.insertAdjacentHTML('afterbegin', newListHTML);
+}
+
+/* ── SUBMIT COMMENT ───────────────────────────────── */
+async function submitComment(taskId) {
+  const nameEl = document.getElementById('cn-' + taskId);
+  const textEl = document.getElementById('ct-' + taskId);
+  const statusEl = document.getElementById('cst-' + taskId);
+  const btn = textEl?.parentElement?.querySelector('.comment-submit');
+
+  const author = nameEl?.value.trim() || 'Anonymous';
+  const text = textEl?.value.trim();
+  if (!text) return;
+
+  if (btn) btn.disabled = true;
+  if (statusEl) statusEl.textContent = 'Saving…';
+
+  if (!COMMENTS[taskId]) COMMENTS[taskId] = [];
+  const comment = {
+    id: Date.now().toString(36) + Math.random().toString(36).slice(2),
+    author, text, ts: Date.now()
+  };
+  COMMENTS[taskId].push(comment);
+
+  await persistComments();
+
+  if (textEl) textEl.value = '';
+  if (statusEl) { statusEl.textContent = 'Saved ✓'; setTimeout(() => { if(statusEl) statusEl.textContent = ''; }, 2000); }
+  if (btn) btn.disabled = false;
+
+  refreshCommentSection(taskId);
+}
+
+/* ── DELETE COMMENT ───────────────────────────────── */
+async function deleteComment(taskId, commentId) {
+  if (!COMMENTS[taskId]) return;
+  COMMENTS[taskId] = COMMENTS[taskId].filter(c => c.id !== commentId);
+  if (!COMMENTS[taskId].length) delete COMMENTS[taskId];
+  await persistComments();
+  refreshCommentSection(taskId);
+}
+
+/* ── RENDER ───────────────────────────────────────── */
+function render() {
+  renderPhaseTabs();
+  renderContent();
+}
+
+/* ── INIT ─────────────────────────────────────────── */
+renderLegend();
+render(); // render immediately so the page isn't blank while loading
+fetchComments().then(() => render()); // then re-render with live comments
+</script>
+</body>
+</html>
