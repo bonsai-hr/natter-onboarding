@@ -485,7 +485,6 @@ function cardHTML(task) {
   </div>
   <div class="task-body">
     <p class="task-desc">${task.desc.replace(/\n/g,'<br>')}</p>
-    <div class="task-footer"><span class="cat-chip">${task.cat}</span></div>
     ${approvalCallout}${resourceCallout}${founderCallout}
     <div class="comment-section" id="cs-${task.id}">
       ${commentListHTML(task.id)}
