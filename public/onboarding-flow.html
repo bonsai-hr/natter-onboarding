@@ -80,12 +80,6 @@
     .phase-heading p { font-size: 13px; color: var(--muted); margin-top: 3px; }
 
     /* ── BANNERS ─────────────────────────────────────── */
-    .founder-banner {
-      display: flex; align-items: flex-start; gap: 10px;
-      background: #FEF2F2; border: 1.5px solid #FECACA;
-      border-radius: 12px; padding: 12px 16px; margin-bottom: 10px;
-      font-size: 12.5px; color: #991B1B; line-height: 1.5;
-    }
     .doc-banner {
       display: flex; align-items: flex-start; gap: 10px;
       background: #FFFBEB; border: 1.5px solid #FDE68A;
@@ -519,12 +513,6 @@ function renderContent() {
 
   let html = `<div class="phase-heading"><h1>${phase.label}</h1><p>${phase.subtitle}</p></div>`;
 
-  if (flagged.length) {
-    html += `<div class="founder-banner">
-      <span>⚑</span>
-      <div><strong>Founder input needed</strong> — ${flagged.length} task${flagged.length>1?'s':''} in this phase need your feedback: ${flagged.map(t=>`<strong>${t.id}</strong>`).join(', ')}. Look for the <span style="color:#DC2626;font-weight:700;">⚑</span> icon on the task row.</div>
-    </div>`;
-  }
   if (tbcCount) {
     html += `<div class="doc-banner">
       <span>📄</span>
