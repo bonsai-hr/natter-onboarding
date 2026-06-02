@@ -368,7 +368,7 @@ const PHASES = [
   { id:'30-day',       label:'30-Day',         subtitle:'30-Day Check-In' },
   { id:'60-day',       label:'60-Day',         subtitle:'60-Day Check-In' },
   { id:'90-day',       label:'90-Day',         subtitle:'90-Day Review' },
-  { id:'founder-qa',  label:'Founder Q&A',    subtitle:'Questions and open discussion for the founding team' },
+  { id:'founder-qa',  label:'Additional Feedback', subtitle:'Open questions and feedback — add anything you want the team to discuss or respond to.' },
 ];
 
 /* ── TASKS ────────────────────────────────────────── */
@@ -526,6 +526,7 @@ function cardHTML(task) {
     ${approvalCallout}${resourceCallout}${founderCallout}
     <div class="comment-section" id="cs-${task.id}">
       ${commentListHTML(task.id)}
+      <p style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#9CA3AF;margin-bottom:8px;">Feedback &amp; comments</p>
       <div class="comment-input-wrap">
         <div class="comment-name-row">
           <input class="comment-name-input" id="cn-${task.id}" type="text" placeholder="Your name" />
