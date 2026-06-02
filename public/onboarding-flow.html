@@ -248,6 +248,44 @@
       min-height: 16px; transition: opacity .2s;
     }
 
+    /* ── FOUNDER Q&A ─────────────────────────────────── */
+    .qa-question-card {
+      border: 1px solid var(--border); border-radius: 12px;
+      border-left: 4px solid #7C3AED;
+      background: var(--white); margin-bottom: 16px; padding: 16px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+    .qa-question-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 0; }
+    .qa-question-text { font-size: 15px; font-weight: 600; color: var(--ink); line-height: 1.5; flex: 1; }
+    .qa-delete-btn {
+      background: none; border: none; cursor: pointer;
+      color: #D1D5DB; font-size: 13px; padding: 2px 4px;
+      transition: color .15s; flex-shrink: 0; line-height: 1;
+    }
+    .qa-delete-btn:hover { color: #DC2626; }
+    .qa-add-section {
+      margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border);
+    }
+    .qa-add-label { font-size: 13px; font-weight: 600; color: var(--ink); margin-bottom: 8px; }
+    .qa-textarea {
+      width: 100%; font-size: 13.5px; padding: 10px 14px;
+      border: 1px solid #E5E7EB; border-radius: 8px;
+      background: #FAFAFA; color: var(--ink);
+      resize: vertical; min-height: 72px; outline: none;
+      font-family: inherit; line-height: 1.5;
+      transition: border-color .15s; display: block; margin-bottom: 10px;
+    }
+    .qa-textarea:focus { border-color: var(--brand); }
+    .qa-textarea::placeholder { color: #9CA3AF; }
+    .qa-post-btn {
+      font-size: 13px; font-weight: 600; padding: 8px 18px;
+      background: var(--brand); color: var(--white);
+      border: none; border-radius: 7px; cursor: pointer;
+      transition: opacity .15s;
+    }
+    .qa-post-btn:hover { opacity: .88; }
+    .qa-post-btn:disabled { opacity: .4; cursor: not-allowed; }
+
     @media (max-width: 640px) {
       .task-timing { display: none; }
       .task-flag-icon::after { right: auto; left: 28px; }
@@ -331,6 +369,7 @@ const PHASES = [
   { id:'30-day',       label:'30-Day',         subtitle:'30-Day Check-In' },
   { id:'60-day',       label:'60-Day',         subtitle:'60-Day Check-In' },
   { id:'90-day',       label:'90-Day',         subtitle:'90-Day Review' },
+  { id:'founder-qa',  label:'Founder Q&A',    subtitle:'Questions and open discussion for the founding team' },
 ];
 
 /* ── TASKS ────────────────────────────────────────── */
@@ -506,8 +545,77 @@ function cardHTML(task) {
 </div>`;
 }
 
+/* ── Q&A QUESTION CARD HTML ───────────────────────── */
+function questionCardHTML(q) {
+  const key = 'qa-q-' + q.id;
+  return `<div class="qa-question-card" data-qid="${esc(q.id)}">
+  <div class="qa-question-header">
+    <p class="qa-question-text">${esc(q.text)}</p>
+    <button class="qa-delete-btn" onclick="deleteQuestion('${esc(q.id)}')" title="Delete question">✕</button>
+  </div>
+  <div class="comment-section" id="cs-${key}">
+    ${commentListHTML(key)}
+    <div class="comment-input-wrap">
+      <div class="comment-name-row">
+        <input class="comment-name-input" id="cn-${key}" type="text" placeholder="Your name" />
+      </div>
+      <div class="comment-textarea-wrap">
+        <textarea class="comment-textarea" id="ct-${key}" placeholder="Leave a comment…" rows="2"></textarea>
+        <button class="comment-submit" onclick="submitComment('${key}')">Post</button>
+      </div>
+      <div class="comment-status" id="cst-${key}"></div>
+    </div>
+  </div>
+</div>`;
+}
+
+/* ── RENDER Q&A PAGE ──────────────────────────────── */
+function renderQAPage() {
+  const questions = COMMENTS['qa-questions'] || [];
+  const phase = PHASES.find(p => p.id === 'founder-qa');
+  let html = `<div class="phase-heading"><h1>Founder Q&amp;A</h1><p>Add questions below — all founders can see and respond.</p></div>`;
+  html += `<div id="qa-question-list">${questions.map(questionCardHTML).join('')}</div>`;
+  html += `<div class="qa-add-section">
+  <div class="qa-add-label">Add a question</div>
+  <textarea class="qa-textarea" id="qa-new-text" placeholder="Type a question for the founders…" rows="3"></textarea>
+  <button class="qa-post-btn" onclick="submitQuestion()">Post Question</button>
+  <div class="comment-status" id="qa-post-status"></div>
+</div>`;
+  document.getElementById('main').innerHTML = html;
+}
+
+/* ── SUBMIT QUESTION ──────────────────────────────── */
+async function submitQuestion() {
+  const textEl = document.getElementById('qa-new-text');
+  const statusEl = document.getElementById('qa-post-status');
+  const btn = document.querySelector('.qa-post-btn');
+  const text = textEl?.value.trim();
+  if (!text) return;
+  if (btn) btn.disabled = true;
+  if (statusEl) statusEl.textContent = 'Saving…';
+  if (!COMMENTS['qa-questions']) COMMENTS['qa-questions'] = [];
+  const q = {
+    id: Date.now().toString(36) + Math.random().toString(36).slice(2),
+    text, ts: Date.now()
+  };
+  COMMENTS['qa-questions'].push(q);
+  await persistComments();
+  renderQAPage();
+}
+
+/* ── DELETE QUESTION ──────────────────────────────── */
+async function deleteQuestion(qId) {
+  if (!COMMENTS['qa-questions']) return;
+  COMMENTS['qa-questions'] = COMMENTS['qa-questions'].filter(q => q.id !== qId);
+  if (!COMMENTS['qa-questions'].length) delete COMMENTS['qa-questions'];
+  delete COMMENTS['qa-q-' + qId];
+  await persistComments();
+  renderQAPage();
+}
+
 /* ── CONTENT ──────────────────────────────────────── */
 function renderContent() {
+  if (activePhase === 'founder-qa') { renderQAPage(); return; }
   const phase = PHASES.find(p => p.id === activePhase);
   const tasks = TASKS.filter(t => t.phase === activePhase);
   const flagged = tasks.filter(t => t.founderNote);
