@@ -484,7 +484,7 @@ function commentListHTML(taskId) {
           <button class="comment-delete" onclick="deleteComment('${taskId}','${c.id}')" title="Delete comment">✕</button>
         </span>
       </div>
-      <p class="comment-text">${esc(c.text)}</p>
+      <p class="comment-text">${esc(c.text).replace(/\n/g, '<br>')}</p>
     </div>`).join('')}
   </div>`;
 }
