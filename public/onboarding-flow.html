@@ -203,7 +203,7 @@
     }
     .comment-author { font-size: 11.5px; font-weight: 700; color: var(--ink); }
     .comment-time { font-size: 10.5px; color: var(--muted); }
-    .comment-text { font-size: 12.5px; color: #374151; line-height: 1.5; white-space: pre-wrap; }
+    .comment-text { font-size: 12.5px; color: #374151; line-height: 1.5; white-space: pre-wrap; word-break: break-word; }
     .comment-delete {
       background: none; border: none; cursor: pointer;
       color: #D1D5DB; font-size: 12px; padding: 0 3px;
@@ -484,7 +484,7 @@ function commentListHTML(taskId) {
           <button class="comment-delete" onclick="deleteComment('${taskId}','${c.id}')" title="Delete comment">✕</button>
         </span>
       </div>
-      <p class="comment-text">${esc(c.text).replace(/\n/g, '<br>')}</p>
+      <p class="comment-text">${esc(c.text)}</p>
     </div>`).join('')}
   </div>`;
 }
