@@ -569,7 +569,7 @@ function questionCardHTML(q) {
 function renderQAPage() {
   const questions = COMMENTS['qa-questions'] || [];
   const phase = PHASES.find(p => p.id === 'founder-qa');
-  let html = `<div class="phase-heading"><h1>Founder Q&amp;A</h1><p>Add questions below — all founders can see and respond.</p></div>`;
+  let html = `<div class="phase-heading"><h1>Additional Feedback</h1><p>Questions and feedback from both sides — add anything you'd like the team to respond to.</p></div>`;
   html += `<div id="qa-question-list">${questions.map(questionCardHTML).join('')}</div>`;
   html += `<div class="qa-add-section">
   <div class="qa-add-label">Add a question or feedback</div>
