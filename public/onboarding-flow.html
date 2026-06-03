@@ -429,7 +429,7 @@ const TASKS = [
 ];
 
 /* ── STATE ────────────────────────────────────────── */
-let activePhase = 'pre-boarding';
+let activePhase = PHASES.find(p => p.id === window.location.hash.slice(1))?.id || 'pre-boarding';
 
 /* ── HELPERS ──────────────────────────────────────── */
 function ownerVars(key) {
@@ -716,6 +716,7 @@ async function deleteComment(taskId, commentId) {
 
 /* ── RENDER ───────────────────────────────────────── */
 function render() {
+  window.location.hash = activePhase;
   renderPhaseTabs();
   renderContent();
 }
