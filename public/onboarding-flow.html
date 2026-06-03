@@ -484,7 +484,7 @@ function commentListHTML(taskId) {
           <button class="comment-delete" onclick="deleteComment('${taskId}','${c.id}')" title="Delete comment">✕</button>
         </span>
       </div>
-      <p class="comment-text">${esc(c.text)}</p>
+      <p class="comment-text" style="white-space:pre-wrap;word-break:break-word;">${esc(c.text)}</p>
     </div>`).join('')}
   </div>`;
 }
@@ -547,7 +547,7 @@ function questionCardHTML(q) {
   const key = 'qa-q-' + q.id;
   return `<div class="qa-question-card" data-qid="${esc(q.id)}">
   <div class="qa-question-header">
-    <p class="qa-question-text">${esc(q.text)}</p>
+    <p class="qa-question-text" style="white-space:pre-wrap;word-break:break-word;">${esc(q.text)}</p>
     <button class="qa-delete-btn" onclick="deleteQuestion('${esc(q.id)}')" title="Delete question">✕</button>
   </div>
   <div class="comment-section" id="cs-${key}">
