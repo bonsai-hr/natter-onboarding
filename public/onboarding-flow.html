@@ -684,8 +684,8 @@ async function submitComment(taskId) {
   const btn = textEl?.parentElement?.querySelector('.comment-submit');
 
   const author = nameEl?.value.trim() || 'Anonymous';
-  const text = textEl?.value.trim();
-  if (!text) return;
+  const text = textEl?.value;
+  if (!text?.trim()) return;
 
   if (btn) btn.disabled = true;
   if (statusEl) statusEl.textContent = 'Saving…';
