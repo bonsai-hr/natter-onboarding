@@ -572,8 +572,8 @@ function renderQAPage() {
   let html = `<div class="phase-heading"><h1>Founder Q&amp;A</h1><p>Add questions below — all founders can see and respond.</p></div>`;
   html += `<div id="qa-question-list">${questions.map(questionCardHTML).join('')}</div>`;
   html += `<div class="qa-add-section">
-  <div class="qa-add-label">Add a question</div>
-  <textarea class="qa-textarea" id="qa-new-text" placeholder="Type a question for the founders…" rows="3"></textarea>
+  <div class="qa-add-label">Add a question or feedback</div>
+  <textarea class="qa-textarea" id="qa-new-text" placeholder="Add a question or piece of feedback…" rows="3"></textarea>
   <button class="qa-post-btn" onclick="submitQuestion()">Post Question</button>
   <div class="comment-status" id="qa-post-status"></div>
 </div>`;
